@@ -1,0 +1,17 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Node modules
+**/node_modules/
+
+# VSCode
+.vscode/
+
+# Build files
+**/bin/
+**/obj/
