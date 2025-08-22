@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: WellDesk FastAPI backend deployed via Lambda and API Gateway
+
+Resources:
+
+  WellDeskLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: wellDeskLambdaRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: WellDeskS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: arn:aws:s3:::welldesk-user-data/*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  WellDeskLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: WellDeskBackend
+      Handler: main.handler
+      Role: !GetAtt WellDeskLambdaRole.Arn
+      Runtime: python3.11
+      Code:
+        S3Bucket: welldesk-deployments
+        S3Key: welldesk-api.zip
+      Timeout: 30
+      MemorySize: 256
+
+  WellDeskApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: WellDeskAPI
+      ProtocolType: HTTP
+
+  WellDeskApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WellDeskApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub
+        - arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+        - {
+            Region: !Ref "AWS::Region",
+            LambdaArn: !GetAtt WellDeskLambdaFunction.Arn
+          }
+      PayloadFormatVersion: '2.0'
+
+  WellDeskApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WellDeskApi
+      RouteKey: "ANY /{proxy+}"
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref WellDeskApiIntegration
+
+  WellDeskApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref WellDeskApi
+      StageName: prod
+      AutoDeploy: true
+
+  LambdaApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref WellDeskLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WellDeskApi}/*"
+
+Outputs:
+  ApiEndpoint:
+    Description: "WellDesk API endpoint"
+    Value: !Sub "https://${WellDeskApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"

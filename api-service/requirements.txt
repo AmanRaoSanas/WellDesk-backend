@@ -1,0 +1,6 @@
+fastapi==0.116.1
+uvicorn[standard]==0.22.0       # latest stable with extras
+boto3==1.40.11
+python-dotenv==1.1.1
+python-multipart==0.0.20
+mangum==0.14.0                 # for lambda adapter (agar use kar rahe ho)
