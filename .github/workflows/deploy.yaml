@@ -50,6 +50,6 @@ jobs:
       - name: Deploy via CloudFormation
         run: |
           aws cloudformation deploy \
-            --template-file api-service/deploy.yaml \
+            --template-file api-service/template.yaml \
             --stack-name WellDeskBackendStack \
             --capabilities CAPABILITY_NAMED_IAM
