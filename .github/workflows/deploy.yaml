@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd api-service
+          cd api_service
           pip install -r requirements.txt -t package/
 
       - name: Copy backend files
