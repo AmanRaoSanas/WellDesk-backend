@@ -16,5 +16,6 @@ __pycache__/
 **/bin/
 **/obj/
 
+testfile/
 
 .env
