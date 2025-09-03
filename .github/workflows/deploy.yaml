@@ -29,12 +29,12 @@ jobs:
 
       - name: Copy backend files
         run: |
-          cd api-service
+          cd api_service
           cp *.py package/
 
       - name: Zip deployment package
         run: |
-          cd api-service/package
+          cd api_service/package
           zip -r ../../welldesk-api.zip .
 
       - name: Configure AWS credentials using OIDC
@@ -50,6 +50,6 @@ jobs:
       - name: Deploy via CloudFormation
         run: |
           aws cloudformation deploy \
-            --template-file api-service/template.yaml \
+            --template-file api_service/template.yaml \
             --stack-name WellDeskBackendStack \
             --capabilities CAPABILITY_NAMED_IAM
