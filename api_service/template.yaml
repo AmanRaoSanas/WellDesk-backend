@@ -29,6 +29,10 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: arn:aws:ssm:ap-south-1:<account-id>:parameter/welldesk/s3/bucket_name
 
   WellDeskLambdaFunction:
     Type: AWS::Lambda::Function
@@ -42,6 +46,7 @@ Resources:
         S3Key: welldesk-api.zip
       Timeout: 30
       MemorySize: 256
+
 
   WellDeskApi:
     Type: AWS::ApiGatewayV2::Api
