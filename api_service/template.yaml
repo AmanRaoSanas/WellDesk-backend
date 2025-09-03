@@ -32,7 +32,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - ssm:GetParameter
-                Resource: arn:aws:ssm:ap-south-1:<account-id>:parameter/welldesk/s3/bucket_name
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/welldesk/s3/bucket_name
 
   WellDeskLambdaFunction:
     Type: AWS::Lambda::Function
